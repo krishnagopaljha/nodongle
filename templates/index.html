@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoDongle</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1a1a1a;
+            --bg-darker: #121212;
+            --bg-card: #2d2d2d;
+            --bg-card-header: #333333;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #999999;
+            --border-color: #444444;
+            --primary-color: #4a6bff;
+            --success-color: #010201;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --primary-color: #4a6bff;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+        }
+
+        body {
+            background-color: var(--bg-darker);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: var(--bg-card-header);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .list-group-item {
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .list-group-item:hover {
+            background-color: var(--bg-card-header);
+        }
+
+        .selected-network {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .status-box {
+            height: 150px;
+            overflow-y: auto;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .progress {
+            height: 30px;
+            background-color: var(--bg-card-header);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+            color: #212529;
+        }
+
+        .signal-strength {
+            float: right;
+            color: var(--text-secondary);
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        .form-control,
+        .form-control:focus {
+            background-color: var(--bg-card);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .form-label {
+            color: var(--text-primary);
+        }
+
+        .status-message {
+            margin-bottom: 5px;
+            padding: 3px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .status-time {
+            color: var(--text-muted);
+            margin-right: 10px;
+        }
+
+        .progress-bar {
+            background-color: var(--primary-color);
+        }
+
+        .bg-success {
+            background-color: var(--success-color) !important;
+        }
+
+        .bg-danger {
+            background-color: var(--danger-color) !important;
+        }
+
+        h5 {
+            color: #ffffff;
+            /* For example: #4a6bff for the primary blue */
+        }
+
+        .card-body p.mb-1 small,
+        .card-body p.mb-0 small {
+            color: var(--text-primary) !important;
+            /* #ffffff */
+        }
+
+        .progress-bar {
+            background-color: var(--primary-color);
+            /* Default blue color */
+        }
+
+        .bg-success {
+            background-color: var(--success-color) !important;
+            /* Green */
+        }
+
+        .bg-danger {
+            background-color: var(--danger-color) !important;
+            /* Red */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-4">
+        <div class="text-center mb-4">
+            <h1 class="text-primary">NoDongle</h1>
+            <p class="text-muted">Use responsibly and only on networks you have permission to test</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">WiFi Networks</h5>
+                    </div>
+                    <div class="card-body">
+                        <button id="scanBtn" class="btn btn-primary mb-3">Scan Networks</button>
+                        <div class="list-group" id="networkList">
+                            <!-- Networks will appear here -->
+                            <div class="list-group-item text-center text-muted">
+                                No networks scanned yet
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title">Selected Target</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="selectedNetworkInfo">
+                            <p class="text-muted">No network selected</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Wordlist</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="uploadForm" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="wordlistFile" class="form-label">Upload Wordlist</label>
+                                <input class="form-control" type="file" id="wordlistFile" accept=".txt" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Upload</button>
+                        </form>
+                        <div class="mt-3">
+                            <p>Current wordlist: <span id="currentWordlist" class="text-muted">None</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title">Attack Controls</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button id="startAttackBtn" class="btn btn-danger" disabled>Start Attack</button>
+                            <button id="stopAttackBtn" class="btn btn-warning" disabled>Stop Attack</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Attack Status</h5>
+                        <div>
+                            <span id="attemptCount">0</span> passwords attempted
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="status-box" id="statusBox">
+                            <div class="status-message">
+                                <span class="status-time">[System]</span>
+                                Ready to start. Click "Scan Networks" to begin.
+                            </div>
+                        </div>
+                        <div class="progress mt-3">
+                            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedNetwork = null;
+        let attackInProgress = false;
+        let statusInterval = null;
+        let totalPasswords = 0;
+
+        // DOM elements
+        const scanBtn = document.getElementById('scanBtn');
+        const networkList = document.getElementById('networkList');
+        const selectedNetworkInfo = document.getElementById('selectedNetworkInfo');
+        const uploadForm = document.getElementById('uploadForm');
+        const startAttackBtn = document.getElementById('startAttackBtn');
+        const stopAttackBtn = document.getElementById('stopAttackBtn');
+        const statusBox = document.getElementById('statusBox');
+        const progressBar = document.getElementById('progressBar');
+        const attemptCount = document.getElementById('attemptCount');
+        const currentWordlist = document.getElementById('currentWordlist');
+
+        // Scan for networks
+        scanBtn.addEventListener('click', async () => {
+            try {
+                scanBtn.disabled = true;
+                scanBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Scanning...';
+
+                updateStatus('Starting network scan...', 'System');
+
+                const response = await fetch('/scan');
+                const networks = await response.json();
+
+                networkList.innerHTML = '';
+
+                if (networks.length === 0) {
+                    networkList.innerHTML = '<div class="list-group-item text-center text-muted">No networks found</div>';
+                    updateStatus('Scan completed. No networks found.', 'System');
+                    return;
+                }
+
+                networks.forEach(network => {
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item';
+                    item.innerHTML = `
+                        <strong>${network.ssid}</strong>
+                        <span class="signal-strength">${network.signal}%</span>
+                        <small class="d-block text-muted">${network.bssid}</small>
+                    `;
+
+                    item.addEventListener('click', () => {
+                        // Remove selected class from all items
+                        document.querySelectorAll('.list-group-item').forEach(el => {
+                            el.classList.remove('selected-network');
+                        });
+
+                        // Add selected class to clicked item
+                        item.classList.add('selected-network');
+
+                        // Store selected network
+                        selectedNetwork = network;
+
+                        // Update selected network info
+                        selectedNetworkInfo.innerHTML = `
+                            <h5>${network.ssid}</h5>
+                            <p class="mb-1"><small>BSSID: ${network.bssid}</small></p>
+                            <p class="mb-0"><small>Signal: ${network.signal}%</small></p>
+                        `;
+
+                        // Enable attack button if wordlist is loaded
+                        fetch('/select', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(network)
+                        }).then(() => {
+                            if (currentWordlist.textContent !== 'None') {
+                                startAttackBtn.disabled = false;
+                            }
+                            updateStatus(`Selected target: ${network.ssid} (${network.bssid})`, 'System');
+                        });
+                    });
+
+                    networkList.appendChild(item);
+                });
+
+                updateStatus(`Scan completed. Found ${networks.length} networks.`, 'System');
+            } catch (error) {
+                updateStatus(`Error scanning networks: ${error.message}`, 'Error');
+            } finally {
+                scanBtn.disabled = false;
+                scanBtn.textContent = 'Scan Networks';
+            }
+        });
+
+        // Upload wordlist
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('wordlistFile');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                updateStatus('Please select a file first', 'Error');
+                return;
+            }
+
+            const submitBtn = uploadForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                updateStatus(`Uploading wordlist: ${file.name}`, 'System');
+
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    currentWordlist.textContent = result.path;
+                    updateStatus('Wordlist uploaded successfully', 'System');
+
+                    // Count lines in the wordlist (approximate)
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const content = e.target.result;
+                        totalPasswords = content.split('\n').length;
+                        updateStatus(`Wordlist contains approximately ${totalPasswords} passwords`, 'System');
+                    };
+                    reader.readAsText(file);
+
+                    // Enable attack button if network is selected
+                    if (selectedNetwork) {
+                        startAttackBtn.disabled = false;
+                    }
+                } else {
+                    updateStatus(`Error: ${result.error}`, 'Error');
+                }
+            } catch (error) {
+                updateStatus(`Error uploading file: ${error.message}`, 'Error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Upload';
+            }
+        });
+
+        // Start attack
+        startAttackBtn.addEventListener('click', async () => {
+            if (!selectedNetwork) {
+                updateStatus('Please select a network first', 'Error');
+                return;
+            }
+
+            try {
+                startAttackBtn.disabled = true;
+                startAttackBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Starting...';
+
+                updateStatus(`Starting attack against ${selectedNetwork.ssid}`, 'System');
+
+                const response = await fetch('/start_attack', {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    attackInProgress = true;
+                    stopAttackBtn.disabled = false;
+                    scanBtn.disabled = true;
+
+                    // Reset progress bar
+                    progressBar.style.width = '0%';
+                    progressBar.classList.remove('bg-success', 'bg-danger');
+                    progressBar.classList.add('progress-bar-animated');
+
+                    // Start polling for status updates
+                    if (statusInterval) clearInterval(statusInterval);
+                    statusInterval = setInterval(updateAttackStatus, 1000);
+
+                    updateStatus('Attack started', 'System');
+                } else {
+                    updateStatus(`Error: ${result.error}`, 'Error');
+                }
+            } catch (error) {
+                updateStatus(`Error starting attack: ${error.message}`, 'Error');
+            } finally {
+                startAttackBtn.disabled = attackInProgress;
+                startAttackBtn.textContent = 'Start Attack';
+            }
+        });
+
+        // Stop attack
+        stopAttackBtn.addEventListener('click', async () => {
+            try {
+                stopAttackBtn.disabled = true;
+                stopAttackBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Stopping...';
+
+                updateStatus('Stopping attack...', 'System');
+
+                const response = await fetch('/stop_attack', {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    attackInProgress = false;
+                    scanBtn.disabled = false;
+
+                    if (statusInterval) clearInterval(statusInterval);
+
+                    updateStatus('Attack stopped by user', 'System');
+                    progressBar.classList.remove('progress-bar-animated');
+                }
+            } catch (error) {
+                updateStatus(`Error stopping attack: ${error.message}`, 'Error');
+            } finally {
+                stopAttackBtn.disabled = !attackInProgress;
+                stopAttackBtn.textContent = 'Stop Attack';
+                startAttackBtn.disabled = attackInProgress;
+            }
+        });
+
+        // Update attack status
+        async function updateAttackStatus() {
+    try {
+        const response = await fetch('/status');
+        const status = await response.json();
+        
+        if (status && status.status) {
+            updateStatus(status.status, 'Status');
+            attemptCount.textContent = status.attempted_count;
+            
+            // Update progress
+            if (status.in_progress && totalPasswords > 0) {
+                const progress = (status.attempted_count / totalPasswords) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressBar.classList.remove('bg-success', 'bg-danger');
+                progressBar.classList.add('progress-bar-animated');
+            }
+            
+            // Handle attack completion
+            if (!status.in_progress) {
+                clearInterval(statusInterval);
+                startAttackBtn.disabled = false;
+                stopAttackBtn.disabled = true;
+                scanBtn.disabled = false;
+                progressBar.classList.remove('progress-bar-animated');
+                
+                if (status.password_found) {
+                    progressBar.classList.add('bg-success'); // Green for success
+                } else {
+                    progressBar.classList.add('bg-danger'); // Red for failure
+                }
+            }
+        }
+    } catch (error) {
+        updateStatus(`Error getting status: ${error.message}`, 'Error');
+    }
+}
+        // Helper function to update status box
+        function updateStatus(message, source = 'System') {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+
+            const statusElement = document.createElement('div');
+            statusElement.className = 'status-message';
+
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'status-time';
+            timeSpan.textContent = `[${source} ${timeString}]`;
+
+            const messageSpan = document.createElement('span');
+            messageSpan.textContent = message;
+
+            // Color coding based on source
+            if (source === 'Error') {
+                timeSpan.style.color = 'var(--danger-color)';
+            } else if (source === 'Success!') {
+                timeSpan.style.color = 'var(--success-color)';
+            } else if (source === 'Status') {
+                timeSpan.style.color = 'var(--primary-color)';
+            }
+
+            statusElement.appendChild(timeSpan);
+            statusElement.appendChild(messageSpan);
+            statusBox.appendChild(statusElement);
+
+            // Limit to 100 messages to prevent memory issues
+            if (statusBox.children.length > 100) {
+                statusBox.removeChild(statusBox.children[0]);
+            }
+
+            statusBox.scrollTop = statusBox.scrollHeight;
+        }
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatus('Application loaded and ready', 'System');
+        });
+    </script>
+</body>
+
+</html>

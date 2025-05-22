@@ -1,0 +1,4 @@
+Flask
+pywifi
+Werkzeug
+comtypes
