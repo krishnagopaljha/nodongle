@@ -1,4 +1,4 @@
-# WiFi Bruteforce Tool (Adapter-Free)
+# NoDongle
 
 A Python-based WiFi penetration testing tool that performs bruteforce attacks **without requiring physical adapters**, using `pywifi`'s software implementation. Designed for ethical hacking and security audits.
 
