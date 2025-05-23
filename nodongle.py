@@ -155,8 +155,17 @@ def index():
 
 @app.route('/scan', methods=['GET'])
 def scan():
-    networks = scan_for_networks()
-    return jsonify(networks)
+    try:
+        networks = scan_for_networks()
+        return jsonify({
+            'status': 'success',
+            'networks': networks
+        }), 200, {'Content-Type': 'application/json'}
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
 
 @app.route('/select', methods=['POST'])
 def select():
